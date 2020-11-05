@@ -1,7 +1,7 @@
-package fh.campus.asd.usermanagement.exceptions.authetication;
+package fh.campus.asd.backend.usermanagement.exceptions.authetication;
 
 
-import fh.campus.asd.usermanagement.exceptions.datamanger.UserManagerException;
+import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerException;
 
 public class UserManagerPasswordWrogException extends UserManagerException {
     public UserManagerPasswordWrogException(String msg) {
