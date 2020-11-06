@@ -1,26 +1,39 @@
-package fh.campus.asd.backend.usermanagement.implementation;
+package fh.campus.asd.backend.usermanagement.implementations;
 
 import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerPasswordEncryptionException;
 import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerPasswordWrogException;
 import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerSessionIdNotValidException;
 import fh.campus.asd.backend.usermanagement.exceptions.dataaccessor.UserManagerUserNotFoundException;
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.*;
+import fh.campus.asd.backend.usermanagement.implementations.helper.JavaMemoryUserManager;
+import fh.campus.asd.backend.usermanagement.implementations.helper.SimplePasswordAuthenticator;
+import fh.campus.asd.backend.usermanagement.implementations.helper.SimpleSessionManager;
 import fh.campus.asd.backend.usermanagement.interfaces.PasswordAuthenticatorIF;
 import fh.campus.asd.backend.usermanagement.interfaces.SessionManagerIF;
 import fh.campus.asd.backend.usermanagement.interfaces.UserAccessorIF;
-import fh.campus.asd.backend.usermanagement.interfaces.UserManagerIF;
+import fh.campus.asd.backend.usermanagement.interfaces.UserManagerService;
 import fh.campus.asd.backend.usermanagement.models.Session;
 import fh.campus.asd.backend.usermanagement.models.User;
 
-public class UserManager implements UserManagerIF {
-    private final UserAccessorIF userAccessorIF;
-    private final SessionManagerIF sessionManagerIF;
-    private final PasswordAuthenticatorIF authenticatorIF;
+public class SimpleUserManagerImpl implements UserManagerService {
+    private static SimpleUserManagerImpl userManager = new SimpleUserManagerImpl();
 
-    public UserManager(UserAccessorIF userAccessorIF, SessionManagerIF sessionManagerIF, PasswordAuthenticatorIF authenticatorIF) {
-        this.userAccessorIF = userAccessorIF;
-        this.sessionManagerIF = sessionManagerIF;
-        this.authenticatorIF = authenticatorIF;
+    private  UserAccessorIF userAccessorIF;
+    private  SessionManagerIF sessionManagerIF;
+    private  PasswordAuthenticatorIF authenticatorIF;
+
+    public SimpleUserManagerImpl(){
+
+    }
+
+    public void init(){
+        this.sessionManagerIF = SimpleSessionManager.getInstance();
+        this.userAccessorIF = new JavaMemoryUserManager().getInstance();
+        this.authenticatorIF = new SimplePasswordAuthenticator();
+    }
+
+    public static SimpleUserManagerImpl getInstance() {
+        return userManager;
     }
 
     public String login(String userName, String loginPassword) throws UserManagerCredentialsWrogException {
@@ -30,7 +43,7 @@ public class UserManager implements UserManagerIF {
             Session newSession = sessionManagerIF.createNewSession(user);
             return newSession.getSessionId();
         } catch (UserManagerUserNotFoundException | UserManagerPasswordWrogException e) {
-            throw new UserManagerCredentialsWrogException("Your credentials are wrong");
+            throw new UserManagerCredentialsWrogException("Your credentials are wrong!"+e.getMessage());
         }
     }
 
@@ -63,22 +76,21 @@ public class UserManager implements UserManagerIF {
     }
 
     public void createUserProfile(String firstName, String lastName, String userName, String password) throws UserManagerException {
-        try {
-            userAccessorIF.addUser(new User(userName, firstName, lastName, authenticatorIF.encryptPassword(password)));
-        } catch (fh.campus.asd.backend.usermanagement.exceptions.dataaccessor.UserManagerUserAlreadyExistException e) {
-            throw new UserManagerUserAlreadyExistException("User with this name already exists!");
-        }catch (UserManagerPasswordEncryptionException e){
-            throw new UserManagerException(e.getMessage());
-        }
-
+        userAccessorIF.addUser(new User(userName, firstName, lastName, authenticatorIF.encryptPassword(password)));
     }
 
+
+
     public void logout(String sessionId) throws UserManagerSessionIdNotValidException {
+
         try {
+            for (Session s: sessionManagerIF.getSessions()) {
+                System.out.println(s.getSessionId());
+            }
             Session session = sessionManagerIF.findSessionById(sessionId);
             sessionManagerIF.destroySessionWithId(session);
         } catch (UserManagerSessionNotFoundException e) {
-            throw new UserManagerSessionIdNotValidException("Your session is not vaild!");
+            throw new UserManagerSessionIdNotValidException("Your session is not vaild! ");
         }
     }
 }

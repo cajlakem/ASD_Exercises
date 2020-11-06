@@ -1,4 +1,4 @@
-package fh.campus.asd.backend.usermanagement.implementations;
+package fh.campus.asd.backend.usermanagement.implementations.helper;
 
 import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerPasswordEncryptionException;
 import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerPasswordWrogException;

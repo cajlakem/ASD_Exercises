@@ -1,21 +1,28 @@
-package fh.campus.asd.backend.usermanagement.implementations;
+package fh.campus.asd.backend.usermanagement.implementations.helper;
 
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerSessionNotFoundException;
 import fh.campus.asd.backend.usermanagement.interfaces.SessionManagerIF;
 import fh.campus.asd.backend.usermanagement.models.Session;
 import fh.campus.asd.backend.usermanagement.models.User;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleSessionManager implements SessionManagerIF, Runnable {
-    private final Set<Session> sessions = new HashSet<>();
-    private final long cleanUpSessionsOlderThanNMillisec;
-    private final long cleanUpIntervalInMillisec;
 
-    public SimpleSessionManager(long cleanUpSessionsOlderThanNMillisec, long cleanUpIntervalInMillisec) {
-        this.cleanUpSessionsOlderThanNMillisec = cleanUpSessionsOlderThanNMillisec;
-        this.cleanUpIntervalInMillisec = cleanUpIntervalInMillisec;
+    private static SimpleSessionManager sessionManager = new SimpleSessionManager();
+    private List<Session> sessions = new ArrayList<>();
+    private final long cleanUpSessionsOlderThanNMillisec = 60000;
+    private final long cleanUpIntervalInMillisec = 30000;
+
+    public SimpleSessionManager() {
+        Thread thread = new Thread(this);
+        thread.start();
+
+    }
+
+    public static SimpleSessionManager getInstance(){
+        return sessionManager;
     }
 
     private String generateSessionId(){
@@ -24,7 +31,7 @@ public class SimpleSessionManager implements SessionManagerIF, Runnable {
 
     public Session createNewSession(User user) {
         Session newSession = new Session(user, this.generateSessionId());
-        sessions.add(newSession);
+        this.sessions.add(newSession);
         return newSession;
     }
 
@@ -33,22 +40,31 @@ public class SimpleSessionManager implements SessionManagerIF, Runnable {
     }
 
     public Session findSessionById(String sessionId) throws UserManagerSessionNotFoundException {
-        for (Session session: sessions) {
+        for (Session session: this.sessions) {
             if(session.getSessionId().equals(sessionId)) return session;
         }
         throw new UserManagerSessionNotFoundException("Session with "+sessionId+ " not found!");
     }
 
-    public void run() {
-        try {
-            Thread.sleep(cleanUpIntervalInMillisec);
-            this.cleanUpOlderSessions();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public List<Session> getSessions() {
+        return this.sessions;
     }
 
     private void cleanUpOlderSessions(){
         sessions.removeIf(session -> session.isLastAccessOlderThan(cleanUpSessionsOlderThanNMillisec));
+    }
+
+    @Override
+    public void run() {
+        while(true){
+            this.cleanUpOlderSessions();
+            try {
+                System.out.println("Waiting for cleaning the sessions...");
+                Thread.sleep(this.cleanUpIntervalInMillisec);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

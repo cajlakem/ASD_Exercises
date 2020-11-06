@@ -21,7 +21,7 @@ public class Session {
 
     public boolean isLastAccessOlderThan(long seconds){
         long userActiveTime = System.currentTimeMillis() - this.tsLastAccess;
-        return userActiveTime >= seconds;
+        return userActiveTime <= seconds;
     }
 
     public long getTsLastAccess() {

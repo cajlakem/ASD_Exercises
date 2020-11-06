@@ -2,7 +2,7 @@ package fh.campus.asd.backend.usermanagement.interfaces;
 
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerException;
 
-public interface UserManagerIF {
+public interface UserManagerService {
     String login(String userName, String password) throws UserManagerException;
     void changePassword(String sessionId, String oldPassword, String newPassword) throws UserManagerException;
     void deleteUserProfile(String sessionId) throws UserManagerException;
