@@ -2,9 +2,11 @@ package fh.campus.asd.frontend.controllers;
 
 import fh.campus.asd.backend.usermanagement.exceptions.creation.UserManagerFailedToCreateUserManagerException;
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerException;
+import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerPasswordsDifferentException;
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerSessionNotFoundException;
 import fh.campus.asd.backend.usermanagement.factory.UserManagerFactory;
 import fh.campus.asd.backend.usermanagement.interfaces.UserManagerService;
+import fh.campus.asd.backend.usermanagement.models.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,11 +14,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 import java.io.IOException;
 import java.net.URL;
@@ -29,6 +30,9 @@ public class HomeController implements Initializable{
 
     @FXML
     private Button logout;
+
+    @FXML
+    private Button changePassword;
 
     @FXML
     private TextField username;
@@ -70,6 +74,76 @@ public class HomeController implements Initializable{
             stage.setScene(members);
             stage.show();
         } catch (IOException e) {
+            showAlert(e.getMessage());
+        }
+    }
+
+    @FXML
+    public void changePassword(ActionEvent actionEvent) {
+        try {
+            try{
+                Dialog<User> dialog = new Dialog<>();
+                dialog.setTitle("Reset Password");
+                dialog.setHeaderText("Change Your Password:");
+                dialog.setResizable(true);
+
+                Label label1 = new Label("*Old Password: ");
+                Label label2 = new Label("*New Password: ");
+                Label label3 = new Label("*Confirm New Password: ");
+
+                PasswordField text1 = new PasswordField();
+                PasswordField text2 = new PasswordField();
+                PasswordField text3 = new PasswordField();
+
+                GridPane grid = new GridPane();
+                grid.add(label1, 1, 1);
+                grid.add(text1, 2, 1);
+                grid.add(label2, 1, 3);
+                grid.add(text2, 2, 3);
+                grid.add(label3, 1, 4);
+                grid.add(text3, 2, 4);
+
+                dialog.getDialogPane().setContent(grid);
+
+                ButtonType buttonTypeChange = new ButtonType("Change Password", ButtonBar.ButtonData.OK_DONE);
+                ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+                dialog.getDialogPane().getButtonTypes().add(buttonTypeChange);
+                dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
+
+                dialog.setResultConverter(new Callback<ButtonType, User>() {
+                    @Override
+                    public User call(ButtonType b) {
+                        if (b == buttonTypeChange) {
+                            try {
+                                if(text1.getText().equals("") || text2.getText().equals("") || text3.getText().equals("")){
+                                    throw new UserManagerException("Check your input!");
+                                }
+                                if(!text2.getText().equals(text3.getText())){
+                                    throw new UserManagerPasswordsDifferentException("Passwords do not match!");
+                                }
+
+                                userManagerIF.changePassword(sessionid.getText(), text1.getText(), text2.getText());
+                                return new User("","","","");
+                            } catch (UserManagerException e) {
+                                showAlert(e.getMessage());
+                            }
+                            return null;
+                        }
+
+                        return null;
+                    }
+                });
+                Optional<User> result = dialog.showAndWait();
+                if (result.isPresent()) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Reset Password");
+                    alert.setHeaderText("Your password has been changed!");
+                    alert.showAndWait();
+                }
+            }catch (Exception e){
+                showAlert(e.getMessage());
+            }
+        } catch (Exception e) {
             showAlert(e.getMessage());
         }
     }

@@ -3,6 +3,7 @@ package fh.campus.asd.backend.usermanagement.implementations;
 import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerPasswordEncryptionException;
 import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerPasswordWrogException;
 import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerSessionIdNotValidException;
+import fh.campus.asd.backend.usermanagement.exceptions.dataaccessor.UserManagerUserAlreadyExistException;
 import fh.campus.asd.backend.usermanagement.exceptions.dataaccessor.UserManagerUserNotFoundException;
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.*;
 import fh.campus.asd.backend.usermanagement.implementations.helper.JavaMemoryUserManager;
@@ -36,14 +37,20 @@ public class SimpleUserManagerImpl implements UserManagerService {
         return userManager;
     }
 
-    public String login(String userName, String loginPassword) throws UserManagerCredentialsWrogException {
+    public String login(String userName, String loginPassword) throws UserManagerCredentialsWrogException, UserManagerMaxLoginAttemptsReachedException {
         try {
             User user = userAccessorIF.findUserby(userName);
+            if(user.getIsAccountDisabled()){
+                throw new UserManagerMaxLoginAttemptsReachedException("Your account has been disabled because of too many login attempts!");
+            }
             authenticatorIF.validatePassword(user.getPassword(), loginPassword);
             Session newSession = sessionManagerIF.createNewSession(user);
             return newSession.getSessionId();
         } catch (UserManagerUserNotFoundException | UserManagerPasswordWrogException e) {
             throw new UserManagerCredentialsWrogException("Your credentials are wrong!"+e.getMessage());
+        }
+        catch (UserManagerMaxLoginAttemptsReachedException ex){
+            throw ex;
         }
     }
 
@@ -92,5 +99,11 @@ public class SimpleUserManagerImpl implements UserManagerService {
         } catch (UserManagerSessionNotFoundException e) {
             throw new UserManagerSessionIdNotValidException("Your session is not vaild! ");
         }
+    }
+
+    @Override
+    public void disableAcoount(String userId) throws UserManagerUserNotFoundException {
+        User user = userAccessorIF.findUserby(userId);
+        user.setIsAccountDisabled(true);
     }
 }

@@ -5,6 +5,7 @@ public class User {
     private String firstName;
     private String lastName;
     private String password;
+    private Boolean isAccountDisabled;
 
     public String getPassword() {
         return password;
@@ -15,6 +16,7 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
+        this.isAccountDisabled = false;
     }
 
     public String getFirstName() {
@@ -48,4 +50,7 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public boolean getIsAccountDisabled(){return this.isAccountDisabled;}
+    public void setIsAccountDisabled(boolean isAccountDisabled){this.isAccountDisabled = isAccountDisabled;}
 }

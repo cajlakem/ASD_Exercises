@@ -2,6 +2,7 @@ package fh.campus.asd.frontend.controllers;
 
 import fh.campus.asd.backend.usermanagement.exceptions.creation.UserManagerFailedToCreateUserManagerException;
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerException;
+import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerMaxLoginAttemptsReachedException;
 import fh.campus.asd.backend.usermanagement.factory.UserManagerFactory;
 import fh.campus.asd.backend.usermanagement.interfaces.UserManagerService;
 import fh.campus.asd.backend.usermanagement.models.User;
@@ -32,6 +33,7 @@ public class LoginController implements Initializable{
     TextField email;
 
     private String sessionId;
+    private Integer loginCounter = 0;
 
     private static LoginController controller;
 
@@ -59,14 +61,26 @@ public class LoginController implements Initializable{
         alert.setHeaderText("You entered weird credentials!");
         alert.setContentText("We can not let you in!");
         try {
-            sessionId = userManagerIF.login(password.getText(), email.getText());
+            if(loginCounter >= 3){
+                userManagerIF.disableAcoount(getUserName());
+                loginCounter = 0;
+                throw new UserManagerMaxLoginAttemptsReachedException("Maximum login attempts reached. Your account has been disabled. Please contact your admin!");
+            }
+            sessionId = userManagerIF.login(email.getText(),password.getText());
             Parent membersarea = FXMLLoader.load(getClass().getResource("../resources/membersArea.fxml"));
             Stage stage = (Stage) ((Node)t.getSource()).getScene().getWindow();
             Scene members = new Scene(membersarea);
             stage.setScene(members);
             stage.show();
-        } catch (UserManagerException | IOException e) {
-            this.showAlert(e.getMessage());
+        }
+        catch (UserManagerMaxLoginAttemptsReachedException ex){
+            this.showAlert(ex.getMessage());
+        }
+        catch (UserManagerException | IOException e) {
+            if(e.getMessage().equals("Your credentials are wrong!Oh nooo")) {
+                loginCounter++;
+            }
+            this.showAlert(e.getMessage() + " " + (3 - loginCounter) + " tries left!");
         }
     }
 
