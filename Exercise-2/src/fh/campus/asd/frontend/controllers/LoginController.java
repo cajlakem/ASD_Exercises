@@ -67,6 +67,7 @@ public class LoginController implements Initializable{
                 throw new UserManagerMaxLoginAttemptsReachedException("Maximum login attempts reached. Your account has been disabled. Please contact your admin!");
             }
             sessionId = userManagerIF.login(email.getText(),password.getText());
+
             Parent membersarea = FXMLLoader.load(getClass().getResource("../resources/membersArea.fxml"));
             Stage stage = (Stage) ((Node)t.getSource()).getScene().getWindow();
             Scene members = new Scene(membersarea);

@@ -28,8 +28,11 @@ public class JavaMemoryUserManager implements UserAccessorIF {
     }
 
     public void deleteUserWithId(String userName) throws UserManagerUserNotFoundException {
-        userList.removeIf(user -> user.amINamed(userName));
-        throw new UserManagerUserNotFoundException("User "+userName+" not found!");
+        boolean response = userList.removeIf(user -> user.amINamed(userName));
+        if(!response)
+        {
+            throw new UserManagerUserNotFoundException("User "+userName+" not found!");
+        }
 
     }
 

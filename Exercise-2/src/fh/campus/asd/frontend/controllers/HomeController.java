@@ -1,6 +1,7 @@
 package fh.campus.asd.frontend.controllers;
 
 import fh.campus.asd.backend.usermanagement.exceptions.creation.UserManagerFailedToCreateUserManagerException;
+import fh.campus.asd.backend.usermanagement.exceptions.dataaccessor.UserManagerUserNotFoundException;
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerException;
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerPasswordsDifferentException;
 import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerSessionNotFoundException;
@@ -24,7 +25,7 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class HomeController implements Initializable{
+public class HomeController implements Initializable {
 
     public static UserManagerService userManagerIF;
 
@@ -35,6 +36,9 @@ public class HomeController implements Initializable{
     private Button changePassword;
 
     @FXML
+    private Button OnDeleteAccount;
+
+    @FXML
     private TextField username;
 
     @FXML
@@ -42,10 +46,12 @@ public class HomeController implements Initializable{
 
 
     private static HomeController instance;
-    public HomeController(){
+
+    public HomeController() {
         instance = this;
     }
-    public static HomeController getInstance(){
+
+    public static HomeController getInstance() {
         return instance;
     }
 
@@ -63,13 +69,14 @@ public class HomeController implements Initializable{
     @FXML
     public void logout(ActionEvent t) {
         try {
-            try{
+            try {
                 userManagerIF.logout(sessionid.getText());
-            }catch (Exception e){
+            } catch (Exception e) {
                 showAlert(e.getMessage());
             }
             Parent login = FXMLLoader.load(getClass().getResource("../resources/loginPage.fxml"));
-            Stage stage = (Stage) ((Node)t.getSource()).getScene().getWindow();
+            Stage stage = (Stage) ((Node) t.getSource()).getScene().getWindow();
+            stage.setResizable(false);
             Scene members = new Scene(login);
             stage.setScene(members);
             stage.show();
@@ -79,9 +86,66 @@ public class HomeController implements Initializable{
     }
 
     @FXML
+    public void OnDeleteAccount(ActionEvent onDeleteAcountEvent) {
+        try {
+            System.out.println("Delete accout triggered " + onDeleteAcountEvent.toString());
+
+            ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.OK_DONE);
+            ButtonType nodel = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+            Alert alert = new Alert(Alert.AlertType.WARNING,
+                    "Are you sure you want to delete Account? sessId: " + LoginController.getInstance().getSessionId(),
+                    yes,
+                    nodel);
+
+            alert.setTitle("Date format warning");
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.orElse(nodel) == yes) {
+                System.out.println("The Yes Button pressed ");
+                String name = LoginController.getInstance().getUserName();
+                String sesId = LoginController.getInstance().getSessionId();
+                try {
+                    userManagerIF.deleteUserProfile(sesId);
+                    ButtonType ok = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
+                    alert = new Alert(Alert.AlertType.CONFIRMATION, "Successfully deleted user: " + name + "SessionId: " + sesId, ok);
+                    alert.setTitle("Account Deletion");
+                    alert.setHeaderText("Deleted...");
+                    Optional<ButtonType> alertResponse = alert.showAndWait();
+                    if (alertResponse.isPresent()) {
+                        System.out.println("------Switching to the login page-----");
+                        Parent membersarea = FXMLLoader.load(getClass().getResource("../resources/loginPage.fxml"));
+                        Stage stage = (Stage) ((Node) onDeleteAcountEvent.getSource()).getScene().getWindow();
+                        Scene members = new Scene(membersarea);
+                        stage.setScene(members);
+                        stage.show();
+                    }
+
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
+
+                    ButtonType ok = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
+                    alert = new Alert(Alert.AlertType.ERROR, "Unable to deleted user: " + name + "SessionId: " + sesId + "Reason: " + e.getMessage(), ok);
+                    alert.setTitle("Account Deletion");
+                    alert.setHeaderText("Deleted...");
+                    Optional<ButtonType> alertResponse = alert.showAndWait();
+
+                }
+
+            } else {
+                System.out.println("The No Button pressed ignore operation");
+
+            }
+
+        } catch (Exception e) {
+            showAlert(e.getMessage());
+        }
+
+    }
+
+    @FXML
     public void changePassword(ActionEvent actionEvent) {
         try {
-            try{
+            try {
                 Dialog<User> dialog = new Dialog<>();
                 dialog.setTitle("Reset Password");
                 dialog.setHeaderText("Change Your Password:");
@@ -115,15 +179,15 @@ public class HomeController implements Initializable{
                     public User call(ButtonType b) {
                         if (b == buttonTypeChange) {
                             try {
-                                if(text1.getText().equals("") || text2.getText().equals("") || text3.getText().equals("")){
+                                if (text1.getText().equals("") || text2.getText().equals("") || text3.getText().equals("")) {
                                     throw new UserManagerException("Check your input!");
                                 }
-                                if(!text2.getText().equals(text3.getText())){
+                                if (!text2.getText().equals(text3.getText())) {
                                     throw new UserManagerPasswordsDifferentException("Passwords do not match!");
                                 }
 
                                 userManagerIF.changePassword(sessionid.getText(), text1.getText(), text2.getText());
-                                return new User("","","","");
+                                return new User("", "", "", "");
                             } catch (UserManagerException e) {
                                 showAlert(e.getMessage());
                             }
@@ -140,7 +204,7 @@ public class HomeController implements Initializable{
                     alert.setHeaderText("Your password has been changed!");
                     alert.showAndWait();
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 showAlert(e.getMessage());
             }
         } catch (Exception e) {
@@ -148,11 +212,13 @@ public class HomeController implements Initializable{
         }
     }
 
-    private void showAlert(String msg){
+    private void showAlert(String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Oh nooo...");
         alert.setHeaderText(msg);
         alert.setContentText("Stop doing that!");
         Optional<ButtonType> result = alert.showAndWait();
     }
+
+
 }

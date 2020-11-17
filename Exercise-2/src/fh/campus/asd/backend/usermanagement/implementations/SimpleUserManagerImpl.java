@@ -72,6 +72,7 @@ public class SimpleUserManagerImpl implements UserManagerService {
     public void deleteUserProfile(String sessionId) throws UserManagerException {
         try {
             Session session = sessionManagerIF.findSessionById(sessionId);
+            System.out.println("User deletion for the sessesId: "+sessionId);
             User currentUser = session.getUser();
             userAccessorIF.deleteUserWithId(currentUser.getUserName());
         } catch (UserManagerSessionNotFoundException e) {
