@@ -19,9 +19,9 @@
             <Blend />
          </effect>
       </ImageView>
-      <Button fx:id="logout" layoutX="210.0" layoutY="323.0" mnemonicParsing="false" onAction="#logout" prefHeight="51.0" prefWidth="256.0" style="-fx-background-color: #F90505;" text="-&gt; Get out!" textFill="#fcf6f6">
+      <Button fx:id="logout" layoutX="210.0" layoutY="351.0" mnemonicParsing="false" onAction="#logout" prefHeight="10.0" prefWidth="256.0" style="-fx-background-color: #006b99;" text="Get out!" textFill="#fcf6f6">
          <font>
-            <Font size="13.0" />
+            <Font size="18.0" />
          </font>
       </Button>
       <Label alignment="CENTER" contentDisplay="CENTER" layoutX="208.0" layoutY="67.0" prefHeight="17.0" prefWidth="242.0" text="Username" textFill="#f2efef">
@@ -35,14 +35,14 @@
             <Font size="24.0" />
          </font>
       </Label>
-      <Button fx:id="changepassword" layoutX="210" layoutY="260" mnemonicParsing="false" onAction="#changePassword" prefHeight="40" prefWidth="256.0" style="-fx-background-color: #999900;" text="-&gt; Change Password!" textFill="#fcf6f6">
+      <Button fx:id="changepassword" layoutX="210.0" layoutY="306.0" mnemonicParsing="false" onAction="#changePassword" prefHeight="10.0" prefWidth="256.0" style="-fx-background-color: #006b99;" text="Change Password!" textFill="#fcf6f6">
          <font>
-            <Font size="13.0" />
+            <Font size="18.0" />
          </font>
       </Button>
-      <Button fx:id="deluser" layoutX="530.0" layoutY="20.0" mnemonicParsing="false" onAction="#OnDeleteAccount" prefHeight="36.0" prefWidth="145.0" style="-fx-background-color: #a40d33;" text="Delete Account" textFill="#fffdfd">
+      <Button fx:id="deluser" layoutX="210.0" layoutY="260.0" mnemonicParsing="false" onAction="#OnDeleteAccount" prefHeight="10.0" prefWidth="256.0" style="-fx-background-color: #a40d33;" text="Delete Account" textFill="#fffdfd">
          <font>
-            <Font size="10.0" />
+            <Font size="18.0" />
          </font>
       </Button>
       <TextField fx:id="sessionid" editable="false" layoutX="192.0" layoutY="29.0" prefHeight="25.0" prefWidth="274.0" />
