@@ -20,7 +20,6 @@ public class Main extends Application {
         primaryStage.setScene(scene1);
 
         primaryStage.setOnCloseRequest(event -> {
-            System.out.println("Window closing...........");
             ExitApplication = true;
             Platform.exit();
         });
