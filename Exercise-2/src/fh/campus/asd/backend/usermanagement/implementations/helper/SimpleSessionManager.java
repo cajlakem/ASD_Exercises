@@ -8,12 +8,16 @@ import fh.campus.asd.backend.usermanagement.models.User;
 import java.util.ArrayList;
 import java.util.List;
 
+import static fh.campus.asd.frontend.Main.ExitApplication;
+import static java.lang.Thread.sleep;
+
+@SuppressWarnings("ALL")
 public class SimpleSessionManager implements SessionManagerIF, Runnable {
 
     private static SimpleSessionManager sessionManager = new SimpleSessionManager();
     private List<Session> sessions = new ArrayList<>();
     private final long cleanUpSessionsOlderThanNMillisec = 60000;
-    private final long cleanUpIntervalInMillisec = 30000;
+    private final long cleanUpIntervalInMillisec = 300;
 
     public SimpleSessionManager() {
         Thread thread = new Thread(this);
@@ -21,11 +25,11 @@ public class SimpleSessionManager implements SessionManagerIF, Runnable {
 
     }
 
-    public static SimpleSessionManager getInstance(){
+    public static SimpleSessionManager getInstance() {
         return sessionManager;
     }
 
-    private String generateSessionId(){
+    private String generateSessionId() {
         return String.valueOf(System.currentTimeMillis());
     }
 
@@ -40,10 +44,10 @@ public class SimpleSessionManager implements SessionManagerIF, Runnable {
     }
 
     public Session findSessionById(String sessionId) throws UserManagerSessionNotFoundException {
-        for (Session session: this.sessions) {
-            if(session.getSessionId().equals(sessionId)) return session;
+        for (Session session : this.sessions) {
+            if (session.getSessionId().equals(sessionId)) return session;
         }
-        throw new UserManagerSessionNotFoundException("Session with "+sessionId+ " not found!");
+        throw new UserManagerSessionNotFoundException("Session with " + sessionId + " not found!");
     }
 
     @Override
@@ -51,17 +55,18 @@ public class SimpleSessionManager implements SessionManagerIF, Runnable {
         return this.sessions;
     }
 
-    private void cleanUpOlderSessions(){
+    private void cleanUpOlderSessions() {
+        System.out.println("Nr auf Active Sessions: "+ sessions.size());
         sessions.removeIf(session -> session.isLastAccessOlderThan(cleanUpSessionsOlderThanNMillisec));
     }
 
     @Override
     public void run() {
-        while(true){
+        while (!ExitApplication) {
             this.cleanUpOlderSessions();
             try {
                 System.out.println("Waiting for cleaning the sessions...");
-                Thread.sleep(this.cleanUpIntervalInMillisec);
+                sleep(ExitApplication ? 0: this.cleanUpIntervalInMillisec);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

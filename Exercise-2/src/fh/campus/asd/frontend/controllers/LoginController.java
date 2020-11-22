@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class LoginController implements Initializable{
+public class LoginController implements Initializable {
 
     public static UserManagerService userManagerIF;
 
@@ -61,24 +61,22 @@ public class LoginController implements Initializable{
         alert.setHeaderText("You entered weird credentials!");
         alert.setContentText("We can not let you in!");
         try {
-            if(loginCounter >= 3){
+            if (loginCounter >= 3) {
                 userManagerIF.disableAcoount(getUserName());
                 loginCounter = 0;
                 throw new UserManagerMaxLoginAttemptsReachedException("Maximum login attempts reached. Your account has been disabled. Please contact your admin!");
             }
-            sessionId = userManagerIF.login(email.getText(),password.getText());
+            sessionId = userManagerIF.login(email.getText(), password.getText());
 
             Parent membersarea = FXMLLoader.load(getClass().getResource("../resources/membersArea.fxml"));
-            Stage stage = (Stage) ((Node)t.getSource()).getScene().getWindow();
+            Stage stage = (Stage) ((Node) t.getSource()).getScene().getWindow();
             Scene members = new Scene(membersarea);
             stage.setScene(members);
             stage.show();
-        }
-        catch (UserManagerMaxLoginAttemptsReachedException ex){
+        } catch (UserManagerMaxLoginAttemptsReachedException ex) {
             this.showAlert(ex.getMessage());
-        }
-        catch (UserManagerException | IOException e) {
-            if(e.getMessage().equals("Your credentials are wrong!Oh nooo")) {
+        } catch (UserManagerException | IOException e) {
+            if (e.getMessage().equals("Your credentials are wrong!Oh nooo")) {
                 loginCounter++;
             }
             this.showAlert(e.getMessage() + " " + (3 - loginCounter) + " tries left!");
@@ -124,24 +122,21 @@ public class LoginController implements Initializable{
         dialog.getDialogPane().getButtonTypes().add(buttonTypeOk);
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
 
-        dialog.setResultConverter(new Callback<ButtonType, User>() {
-            @Override
-            public User call(ButtonType b) {
-                if (b == buttonTypeOk) {
-                    try {
-                        if((text1.getText().equals("") || text4.getText().equals("") || (!(text4.getText().equals(text4.getText()))))){
-                            throw new UserManagerException("Check your input!");
-                        }
-                        userManagerIF.createUserProfile(text3.getText(), text2.getText(), text1.getText(), text4.getText());
-                        return new User("","","","");
-                    } catch (UserManagerException e) {
-                        showAlert(e.getMessage());
+        dialog.setResultConverter(b -> {
+            if (b == buttonTypeOk) {
+                try {
+                    if ((text1.getText().equals("") || text4.getText().equals("") || (!(text4.getText().equals(text4.getText()))))) {
+                        throw new UserManagerException("Check your input!");
                     }
-                    return null;
+                    userManagerIF.createUserProfile(text3.getText(), text2.getText(), text1.getText(), text4.getText());
+                    return new User("", "", "", "");
+                } catch (UserManagerException e) {
+                    showAlert(e.getMessage());
                 }
-
                 return null;
             }
+
+            return null;
         });
         Optional<User> result = dialog.showAndWait();
         if (result.isPresent()) {
@@ -152,7 +147,7 @@ public class LoginController implements Initializable{
         }
     }
 
-    private void showAlert(String msg){
+    private void showAlert(String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Oh nooo...");
         alert.setHeaderText(msg);
@@ -160,7 +155,7 @@ public class LoginController implements Initializable{
         Optional<ButtonType> result = alert.showAndWait();
     }
 
-    public String getUserName(){
+    public String getUserName() {
         return email.getText();
     }
 
