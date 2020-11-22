@@ -1,4 +1,4 @@
-# Exercise 1
+# Exercise 2
 Team members:
 Emir Cajlakovic
 Denis Addo
