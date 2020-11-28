@@ -2,8 +2,16 @@ package fh.campus.asd.backend.usermanagement.models;
 
 
 public class DataManagerObject {
+    public long getTsLastAccess() {
+        return tsLastAccess;
+    }
+
+    public void setTsLastAccess(long tsLastAccess) {
+        this.tsLastAccess = tsLastAccess;
+    }
+
     private long tsLastAccess;
-    DataManagerObject(){
+    public DataManagerObject(){
         tsLastAccess = System.currentTimeMillis();
     }
 }
