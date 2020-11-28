@@ -13,8 +13,8 @@ This guide explains how to run this project in IntelliJ IDEA.
 5. Project structure > Modules > Click Sources > <ins> Set src folder as Source </ins>
 6. Download JavaFX [from here](https://gluonhq.com/products/javafx/) and set on Project structure > Libraries > New (+) > <ins> Lib folder from Javafx </ins> > Add > Apply
 7.  Run > Edit configurations:
-- Set main vlass
-- Set jre
+- Set main class
+- Set JRE path
 - VM Options:
 `--module-path "" --add-modules javafx.controls,javafx.fxml --add-exports javafx.graphics/com.sun.javafx.prism=ALL-UNNAMED` where at `--module-path` you have to set the lib folder of downloaded JavaFx
 
