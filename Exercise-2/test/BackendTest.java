@@ -1,12 +1,26 @@
-import fh.campus.asd.backend.usermanagement.models.DataManagerObject;
+import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerPasswordEncryptionException;
+import fh.campus.asd.backend.usermanagement.exceptions.authetication.UserManagerPasswordWrogException;
+import fh.campus.asd.backend.usermanagement.exceptions.dataaccessor.UserManagerUserAlreadyExistException;
+import fh.campus.asd.backend.usermanagement.exceptions.dataaccessor.UserManagerUserNotFoundException;
+import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerException;
+import fh.campus.asd.backend.usermanagement.exceptions.datamanger.UserManagerSessionNotFoundException;
 import org.junit.jupiter.api.Test;
 import fh.campus.asd.backend.usermanagement.models.User;
 import fh.campus.asd.backend.usermanagement.models.Session;
 import fh.campus.asd.backend.usermanagement.models.DataManagerObject;
+import fh.campus.asd.backend.usermanagement.implementations.helper.JavaMemoryUserManager;
+import fh.campus.asd.backend.usermanagement.implementations.helper.SimplePasswordAuthenticator;
+import fh.campus.asd.backend.usermanagement.implementations.helper.SimpleSessionManager;
+import fh.campus.asd.backend.usermanagement.implementations.SimpleUserManagerImpl;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BackendTest {
     User user = new User("john","john","doe","password");
+    Session session = new Session(user,"session");
     @Test
     void TestUser() {
         user.setIsAccountDisabled(true);
@@ -19,7 +33,7 @@ class BackendTest {
 
     @Test
     void TestSession() {
-        Session session = new Session(user,"session");
+
         session.setTsLastAccess(1);
         assertEquals("session",session.getSessionId());
         assertEquals(1,session.getTsLastAccess());
@@ -34,4 +48,39 @@ class BackendTest {
 
     }
 
+    @Test
+    void TestJavaMemoryUserManager() throws UserManagerUserNotFoundException, UserManagerUserAlreadyExistException {
+        JavaMemoryUserManager  javausermanager = new JavaMemoryUserManager();
+        javausermanager.addUser(user);
+        assertEquals(user,javausermanager.findUserby("john"));
+        javausermanager.deleteUserWithId("john");
+        assertEquals(0,javausermanager.getUserList().size());
+    }
+
+    @Test
+    void TestSimplePasswordAuthenticator() throws UserManagerPasswordEncryptionException, UserManagerPasswordWrogException {
+        SimplePasswordAuthenticator  passwordauthenticator = new SimplePasswordAuthenticator();
+        String password = "password";
+        assertEquals(String.valueOf(password.hashCode()),passwordauthenticator.encryptPassword(password));
+    }
+
+    @Test
+    void TestSimpleSessionManager() throws UserManagerSessionNotFoundException {
+        SimpleSessionManager simplesessionmanager = new SimpleSessionManager();
+        List<Session> sessions = new ArrayList<>();
+        sessions.add(session);
+        simplesessionmanager.setSessions(sessions);
+        simplesessionmanager.createNewSession(user);
+        assertEquals(session,simplesessionmanager.findSessionById("session"));
+        assertEquals(sessions,simplesessionmanager.getSessions());
+        simplesessionmanager.destroySessionWithId(session);
+        assertNotEquals(0,simplesessionmanager.getSessions().size());
+    }
+
+    @Test
+    void TestSimpleUserManagerImpl() throws UserManagerException {
+        SimpleUserManagerImpl simpleusermanager = new SimpleUserManagerImpl();
+        //simpleusermanager.changePassword(session.getSessionId(),"password","newpassword");
+        //assertEquals("newpassword",session.getUser().getPassword());
+    }
 }

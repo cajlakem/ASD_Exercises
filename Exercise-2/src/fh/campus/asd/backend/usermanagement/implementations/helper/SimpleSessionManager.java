@@ -15,6 +15,11 @@ import static java.lang.Thread.sleep;
 public class SimpleSessionManager implements SessionManagerIF, Runnable {
 
     private static SimpleSessionManager sessionManager = new SimpleSessionManager();
+
+    public void setSessions(List<Session> sessions) {
+        this.sessions = sessions;
+    }
+
     private List<Session> sessions = new ArrayList<>();
     private final long cleanUpSessionsOlderThanNMillisec = 60000;
     private final long cleanUpIntervalInMillisec = 300;
@@ -22,7 +27,6 @@ public class SimpleSessionManager implements SessionManagerIF, Runnable {
     public SimpleSessionManager() {
         Thread thread = new Thread(this);
         thread.start();
-
     }
 
     public static SimpleSessionManager getInstance() {

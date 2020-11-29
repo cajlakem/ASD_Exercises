@@ -9,7 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JavaMemoryUserManager implements UserAccessorIF {
+    public List<User> getUserList() {
+        return userList;
+    }
+
     private final List<User> userList = new ArrayList<>();
+
+    public static void setInstance(JavaMemoryUserManager instance) {
+        JavaMemoryUserManager.instance = instance;
+    }
+
     private static JavaMemoryUserManager instance = new JavaMemoryUserManager();
 
     public JavaMemoryUserManager() {
@@ -33,7 +42,6 @@ public class JavaMemoryUserManager implements UserAccessorIF {
         {
             throw new UserManagerUserNotFoundException("User "+userName+" not found!");
         }
-
     }
 
     public void addUser(User user) throws UserManagerUserAlreadyExistException{
